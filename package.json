@@ -42,7 +42,7 @@
     "chai-subset": "^1.6.0",
     "colors": "^1.1.2",
     "eslint": "^8.33.0",
-    "eslint-plugin-babel": "^3.1.0",
+    "eslint-plugin-babel": "^5.3.1",
     "express": "^4.13.4",
     "filereader": "oliverwoodings/FileReader",
     "get-port": "^2.1.0",
