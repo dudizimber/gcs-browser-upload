@@ -1,16 +1,23 @@
-import { Promise } from 'es6-promise'
 import SparkMD5 from 'spark-md5'
 import debug from './debug'
 
 class FileProcessor {
-  constructor (file, chunkSize) {
+
+  private paused: boolean
+  private file: File
+  private chunkSize: number
+
+  private unpauseHandlers: ((val?: any) => void)[]
+
+
+  constructor(file: File, chunkSize: number) {
     this.paused = false
     this.file = file
     this.chunkSize = chunkSize
     this.unpauseHandlers = []
   }
 
-  async run (fn, startIndex = 0, endIndex) {
+  async run(fn: (checksum?: string, index?: number, chunk?: ArrayBuffer) => any, startIndex = 0, endIndex?: number) {
     const { file, chunkSize } = this
     const totalChunks = Math.ceil(file.size / chunkSize)
     let spark = new SparkMD5.ArrayBuffer()
@@ -20,7 +27,7 @@ class FileProcessor {
     debug(` - Start index: ${startIndex}`)
     debug(` - End index: ${endIndex || totalChunks}`)
 
-    const processIndex = async (index) => {
+    const processIndex = async (index: number) => {
       if (index === totalChunks || index === endIndex) {
         debug('File process complete')
         return true
@@ -50,18 +57,18 @@ class FileProcessor {
     await processIndex(startIndex)
   }
 
-  pause () {
+  pause() {
     this.paused = true
   }
 
-  unpause () {
+  unpause() {
     this.paused = false
-    this.unpauseHandlers.forEach((fn) => fn())
+    this.unpauseHandlers.forEach((fn: () => any) => fn())
     this.unpauseHandlers = []
   }
 }
 
-function getChecksum (spark, chunk) {
+function getChecksum(spark: { append: (arg0: any) => void; getState: () => any; end: () => any; setState: (arg0: any) => void }, chunk: unknown) {
   spark.append(chunk)
   const state = spark.getState()
   const checksum = spark.end()
@@ -69,10 +76,10 @@ function getChecksum (spark, chunk) {
   return checksum
 }
 
-async function getData (file, blob) {
-  return new Promise((resolve, reject) => {
+async function getData(file: any, blob: Blob) {
+  return new Promise<ArrayBuffer>((resolve, reject) => {
     let reader = new window.FileReader()
-    reader.onload = () => resolve(reader.result)
+    reader.onload = () => resolve(reader.result as ArrayBuffer)
     reader.onerror = reject
     reader.readAsArrayBuffer(blob)
   })

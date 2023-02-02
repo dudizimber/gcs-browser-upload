@@ -1,87 +1,57 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var STORAGE_KEY = '__gcsBrowserUpload';
-
-var FileMeta = function () {
-  function FileMeta(id, fileSize, chunkSize, storage) {
-    _classCallCheck(this, FileMeta);
-
-    this.id = id;
-    this.fileSize = fileSize;
-    this.chunkSize = chunkSize;
-    this.storage = storage;
-  }
-
-  _createClass(FileMeta, [{
-    key: 'getMeta',
-    value: function getMeta() {
-      var meta = this.storage.getItem(STORAGE_KEY + '.' + this.id);
-      if (meta) {
-        return JSON.parse(meta);
-      } else {
-        return {
-          checksums: [],
-          chunkSize: this.chunkSize,
-          started: false,
-          fileSize: this.fileSize
-        };
-      }
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const STORAGE_KEY = '__gcsBrowserUpload';
+class FileMeta {
+    constructor(id, fileSize, chunkSize, storage) {
+        this.id = id;
+        this.fileSize = fileSize;
+        this.chunkSize = chunkSize;
+        this.storage = storage;
     }
-  }, {
-    key: 'setMeta',
-    value: function setMeta(meta) {
-      var key = STORAGE_KEY + '.' + this.id;
-      if (meta) {
-        this.storage.setItem(key, JSON.stringify(meta));
-      } else {
-        this.storage.removeItem(key);
-      }
+    getMeta() {
+        const meta = this.storage.getItem(`${STORAGE_KEY}.${this.id}`);
+        if (meta) {
+            return JSON.parse(meta);
+        }
+        else {
+            return {
+                checksums: [],
+                chunkSize: this.chunkSize,
+                started: false,
+                fileSize: this.fileSize
+            };
+        }
     }
-  }, {
-    key: 'isResumable',
-    value: function isResumable() {
-      var meta = this.getMeta();
-      return meta.started && this.chunkSize === meta.chunkSize;
+    setMeta(meta) {
+        const key = `${STORAGE_KEY}.${this.id}`;
+        if (meta) {
+            this.storage.setItem(key, JSON.stringify(meta));
+        }
+        else {
+            this.storage.removeItem(key);
+        }
     }
-  }, {
-    key: 'getResumeIndex',
-    value: function getResumeIndex() {
-      return this.getMeta().checksums.length;
+    isResumable() {
+        let meta = this.getMeta();
+        return meta.started && this.chunkSize === meta.chunkSize;
     }
-  }, {
-    key: 'getFileSize',
-    value: function getFileSize() {
-      return this.getMeta().fileSize;
+    getResumeIndex() {
+        return this.getMeta().checksums.length;
     }
-  }, {
-    key: 'addChecksum',
-    value: function addChecksum(index, checksum) {
-      var meta = this.getMeta();
-      meta.checksums[index] = checksum;
-      meta.started = true;
-      this.setMeta(meta);
+    getFileSize() {
+        return this.getMeta().fileSize;
     }
-  }, {
-    key: 'getChecksum',
-    value: function getChecksum(index) {
-      return this.getMeta().checksums[index];
+    addChecksum(index, checksum) {
+        let meta = this.getMeta();
+        meta.checksums[index] = checksum;
+        meta.started = true;
+        this.setMeta(meta);
     }
-  }, {
-    key: 'reset',
-    value: function reset() {
-      this.setMeta(null);
+    getChecksum(index) {
+        return this.getMeta().checksums[index];
     }
-  }]);
-
-  return FileMeta;
-}();
-
+    reset() {
+        this.setMeta(null);
+    }
+}
 exports.default = FileMeta;

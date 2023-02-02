@@ -2,6 +2,8 @@
 
 Chunked, pausable, recoverable uploading to Google Cloud Storage directly from the browser.
 
+This package is forked from [gcs-browser-upload](https://github.com/QubitProducts/gcs-browser-upload). It adds the possibility of adding custom metadata to the uploaded object.
+
 ## How does it work?
 
 1. User selects a file
@@ -17,44 +19,44 @@ Chunked, pausable, recoverable uploading to Google Cloud Storage directly from t
 There is a full example available at `example/example-client`.
 
 ```js
-import Upload from 'gcs-browser-upload'
+import Upload from "gcs-browser-upload";
 
-let input = document.getElementById('fileInput')
-let pause = document.getElementById('pause')
-let unpause = document.getElementById('unpause')
-let upload = null
+let input = document.getElementById("fileInput");
+let pause = document.getElementById("pause");
+let unpause = document.getElementById("unpause");
+let upload = null;
 
-input.addEventListener('change', async () => {
+input.addEventListener("change", async () => {
   upload = new Upload({
-    id: 'foo',
-    url: 'https://www.googleapis.com/..../....',
+    id: "foo",
+    url: "https://www.googleapis.com/..../....",
     file: input.files[0],
     onChunkUpload: (info) => {
-      console.log('Chunk uploaded', info)
-    }
-  })
+      console.log("Chunk uploaded", info);
+    },
+  });
 
   try {
-    await upload.start()
-    console.log('Upload complete!')
+    await upload.start();
+    console.log("Upload complete!");
   } catch (e) {
-    console.log('Upload failed!', e)
+    console.log("Upload failed!", e);
   } finally {
-    upload = null
+    upload = null;
   }
-})
+});
 
-pause.addEventListener('click', () => {
+pause.addEventListener("click", () => {
   if (upload) {
-    upload.pause()
+    upload.pause();
   }
-})
+});
 
-unpause.addEventListener('click', () => {
+unpause.addEventListener("click", () => {
   if (upload) {
-    upload.unpause()
+    upload.unpause();
   }
-})
+});
 ```
 
 ## Config
@@ -87,11 +89,3 @@ make bootstrap     // install dependencies
 make test          // run tests
 make test-watch    // continuously run tests
 ```
-
-## Want to work on this for your day job?
-
-This project was created by the Engineering team at [Qubit](http://www.qubit.com). As we use open source libraries, we make our projects public where possible.
-
-We’re currently looking to grow our team, so if you’re a JavaScript engineer and keen on ES2016 React+Redux applications and Node micro services, why not get in touch? Work with like minded engineers in an environment that has fantastic perks, including an annual ski trip, yoga, a competitive foosball league, and copious amounts of yogurt.
-
-Find more details on our [Engineering site](https://eng.qubit.com). Don’t have an up to date CV? Just link us your Github profile! Better yet, send us a pull request that improves this project.

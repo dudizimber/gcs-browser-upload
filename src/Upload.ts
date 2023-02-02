@@ -1,4 +1,4 @@
-import { put, post } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios'
 import FileMeta from './FileMeta'
 import FileProcessor from './FileProcessor'
 import debug from './debug'
@@ -17,11 +17,37 @@ import * as errors from './errors'
 
 const MIN_CHUNK_SIZE = 262144
 
+export interface IChunkUploadData {
+  totalBytes: number
+  uploadedBytes: number
+  chunkIndex: number
+  chunkLength: number
+}
+
+export interface IUploadOptions {
+  chunkSize?: number;
+  storage?: Storage;
+  contentType?: string;
+  onChunkUpload?: (data: IChunkUploadData) => void;
+  id: string;
+  url: string;
+  file: File;
+  metadata?: Map<string, string>;
+  location?: string;
+}
+
 export default class Upload {
   static errors = errors;
 
-  constructor(args, allowSmallChunks) {
-    var opts = {
+  private opts: IUploadOptions;
+  private meta: FileMeta;
+  private processor: FileProcessor;
+  private lastResult: any;
+
+  private finished = false;
+
+  constructor(args: IUploadOptions, allowSmallChunks: boolean = false) {
+    const opts = {
       chunkSize: MIN_CHUNK_SIZE,
       storage: window.localStorage,
       contentType: 'text/plain',
@@ -81,7 +107,7 @@ export default class Upload {
       await processor.run(uploadChunk, resumeIndex)
     }
 
-    const uploadChunk = async (checksum, index, chunk) => {
+    const uploadChunk = async (checksum: string, index: number, chunk: ArrayBuffer) => {
       const total = opts.file.size
       const start = index * opts.chunkSize
       const end = index * opts.chunkSize + chunk.byteLength - 1
@@ -117,7 +143,7 @@ export default class Upload {
       })
     }
 
-    const validateChunk = async (newChecksum, index) => {
+    const validateChunk = async (newChecksum: string, index: number) => {
       const originalChecksum = meta.getChecksum(index)
       const isChunkValid = originalChecksum === newChecksum
       if (!isChunkValid) {
@@ -187,7 +213,9 @@ export default class Upload {
   }
 }
 
-function checkResponseStatus(res, opts, allowed = []) {
+function checkResponseStatus(res: AxiosResponse, opts: IUploadOptions, allowed = []) {
+  console.log('checkResponseStatus', res.status);
+
   const { status } = res
   if (allowed.indexOf(status) > -1) {
     return true
@@ -215,27 +243,52 @@ function checkResponseStatus(res, opts, allowed = []) {
   }
 }
 
-async function safePut() {
+async function safePut(
+  url: string,
+  data: any,
+  config: AxiosRequestConfig,
+) {
   try {
-    return await put.apply(null, arguments)
+    return await axios.put(
+      url,
+      data,
+      config,
+    )
   } catch (e) {
+    if (isAxiosError(e)) {
+      return e.response;
+    }
     if (e instanceof Error) {
       throw e
-    } else {
-      return e
     }
   }
 }
 
 
-async function safePost() {
+async function safePost(
+  url: string,
+  data: any,
+  config: AxiosRequestConfig,
+) {
   try {
-    return await post.apply(null, arguments)
+    console.log('safePost', url, data, config);
+
+    const d = await axios.post(
+      url,
+      data,
+      config,
+    )
+    console.log('safePost d', d);
+    return d;
   } catch (e) {
+    console.log('safePost error', e);
+
+    if (isAxiosError(e)) {
+      return e.response;
+    }
     if (e instanceof Error) {
       throw e
-    } else {
-      return e
     }
   }
+
 }

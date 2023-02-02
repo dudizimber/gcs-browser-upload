@@ -1,14 +1,19 @@
 const STORAGE_KEY = '__gcsBrowserUpload'
 
 export default class FileMeta {
-  constructor (id, fileSize, chunkSize, storage) {
+  id: string
+  fileSize: number
+  chunkSize: number
+  storage: Storage
+
+  constructor(id: string, fileSize: number, chunkSize: number, storage: Storage) {
     this.id = id
     this.fileSize = fileSize
     this.chunkSize = chunkSize
     this.storage = storage
   }
 
-  getMeta () {
+  getMeta() {
     const meta = this.storage.getItem(`${STORAGE_KEY}.${this.id}`)
     if (meta) {
       return JSON.parse(meta)
@@ -22,7 +27,7 @@ export default class FileMeta {
     }
   }
 
-  setMeta (meta) {
+  setMeta(meta: any) {
     const key = `${STORAGE_KEY}.${this.id}`
     if (meta) {
       this.storage.setItem(key, JSON.stringify(meta))
@@ -31,31 +36,31 @@ export default class FileMeta {
     }
   }
 
-  isResumable () {
+  isResumable() {
     let meta = this.getMeta()
     return meta.started && this.chunkSize === meta.chunkSize
   }
 
-  getResumeIndex () {
+  getResumeIndex() {
     return this.getMeta().checksums.length
   }
 
-  getFileSize () {
+  getFileSize() {
     return this.getMeta().fileSize
   }
 
-  addChecksum (index, checksum) {
+  addChecksum(index: number, checksum: string) {
     let meta = this.getMeta()
     meta.checksums[index] = checksum
     meta.started = true
     this.setMeta(meta)
   }
 
-  getChecksum (index) {
+  getChecksum(index: number) {
     return this.getMeta().checksums[index]
   }
 
-  reset () {
+  reset() {
     this.setMeta(null)
   }
 }
