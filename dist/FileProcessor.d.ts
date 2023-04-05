@@ -1,4 +1,4 @@
-declare class FileProcessor {
+export declare class FileProcessor {
     private paused;
     private file;
     private chunkSize;
@@ -8,5 +8,4 @@ declare class FileProcessor {
     pause(): void;
     unpause(): void;
 }
-export default FileProcessor;
 //# sourceMappingURL=FileProcessor.d.ts.map

@@ -35,9 +35,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Upload = void 0;
 const axios_1 = __importStar(require("axios"));
-const FileMeta_1 = __importDefault(require("./FileMeta"));
-const FileProcessor_1 = __importDefault(require("./FileProcessor"));
+const FileMeta_1 = require("./FileMeta");
+const FileProcessor_1 = require("./FileProcessor");
 const debug_1 = __importDefault(require("./debug"));
 const errors_1 = require("./errors");
 const errors = __importStar(require("./errors"));
@@ -58,8 +59,8 @@ class Upload {
         (0, debug_1.default)(` - File size: ${opts.file.size}`);
         (0, debug_1.default)(` - Chunk size: ${opts.chunkSize}`);
         this.opts = opts;
-        this.meta = new FileMeta_1.default(opts.id, opts.file.size, opts.chunkSize, opts.storage);
-        this.processor = new FileProcessor_1.default(opts.file, opts.chunkSize);
+        this.meta = new FileMeta_1.FileMeta(opts.id, opts.file.size, opts.chunkSize, opts.storage);
+        this.processor = new FileProcessor_1.FileProcessor(opts.file, opts.chunkSize);
         this.lastResult = null;
     }
     start() {
@@ -179,7 +180,7 @@ class Upload {
         (0, debug_1.default)('Upload cancelled');
     }
 }
-exports.default = Upload;
+exports.Upload = Upload;
 Upload.errors = errors;
 function checkResponseStatus(res, opts, allowed = []) {
     console.log('checkResponseStatus', res.status);

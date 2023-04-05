@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.FileProcessor = void 0;
 const spark_md5_1 = __importDefault(require("spark-md5"));
 const debug_1 = __importDefault(require("./debug"));
 class FileProcessor {
@@ -65,6 +66,7 @@ class FileProcessor {
         this.unpauseHandlers = [];
     }
 }
+exports.FileProcessor = FileProcessor;
 function getChecksum(spark, chunk) {
     spark.append(chunk);
     const state = spark.getState();
@@ -82,4 +84,3 @@ function getData(file, blob) {
         });
     });
 }
-exports.default = FileProcessor;

@@ -16,7 +16,7 @@ export interface IUploadOptions {
     metadata?: Map<string, string>;
     location?: string;
 }
-export default class Upload {
+export declare class Upload {
     static errors: typeof errors;
     private opts;
     private meta;

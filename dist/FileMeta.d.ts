@@ -1,4 +1,4 @@
-export default class FileMeta {
+export declare class FileMeta {
     id: string;
     fileSize: number;
     chunkSize: number;

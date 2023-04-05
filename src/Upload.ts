@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios'
-import FileMeta from './FileMeta'
-import FileProcessor from './FileProcessor'
+import {FileMeta} from './FileMeta'
+import {FileProcessor} from './FileProcessor'
 import debug from './debug'
 import {
   DifferentChunkError,
@@ -36,7 +36,7 @@ export interface IUploadOptions {
   location?: string;
 }
 
-export default class Upload {
+export class Upload {
   static errors = errors;
 
   private opts: IUploadOptions;

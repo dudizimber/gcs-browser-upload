@@ -1,7 +1,7 @@
 import SparkMD5 from 'spark-md5'
 import debug from './debug'
 
-class FileProcessor {
+export class FileProcessor {
 
   private paused: boolean
   private file: File
@@ -85,4 +85,3 @@ async function getData(file: any, blob: Blob) {
   })
 }
 
-export default FileProcessor

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.FileMeta = void 0;
 const STORAGE_KEY = '__gcsBrowserUpload';
 class FileMeta {
     constructor(id, fileSize, chunkSize, storage) {
@@ -54,4 +55,4 @@ class FileMeta {
         this.setMeta(null);
     }
 }
-exports.default = FileMeta;
+exports.FileMeta = FileMeta;

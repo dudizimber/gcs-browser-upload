@@ -1,4 +1,4 @@
-export default function makeFile(data) {
+export function makeFile(data) {
   return {
     size: data.length,
     name: 'foo',
