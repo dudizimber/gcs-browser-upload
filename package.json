@@ -45,7 +45,7 @@
     "eslint-plugin-babel": "^5.3.1",
     "express": "^4.13.4",
     "filereader": "oliverwoodings/FileReader",
-    "get-port": "^2.1.0",
+    "get-port": "^6.1.2",
     "jest": "^29.4.1",
     "localStorage": "^1.0.3",
     "mkdirp": "^2.1.3",
