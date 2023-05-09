@@ -15,6 +15,7 @@ export interface IUploadOptions {
     file: File;
     metadata?: Map<string, string>;
     location?: string;
+    skipGoogResumableHeader?: boolean;
 }
 export declare class Upload {
     static errors: typeof errors;

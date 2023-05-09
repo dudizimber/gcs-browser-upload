@@ -1,6 +1,6 @@
 {
   "name": "gcs-browser-upload-metadata",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Resumable, chunked uploads to Google Cloud Storage from the browser",
   "main": "dist/Upload.js",
   "scripts": {

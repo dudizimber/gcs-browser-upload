@@ -34,6 +34,7 @@ export interface IUploadOptions {
   file: File;
   metadata?: Map<string, string>;
   location?: string;
+  skipGoogResumableHeader?: boolean;
 }
 
 export class Upload {
@@ -117,6 +118,9 @@ export class Upload {
         'Content-Range': `bytes ${start}-${end}/${total}`,
         'x-goog-resumable': 'start'
       }
+      if (opts.skipGoogResumableHeader) {
+        delete headers['x-goog-resumable']
+      }
 
       if (opts.metadata) {
         for (const h of (opts.metadata.entries ? opts.metadata.entries() : [])) {
@@ -179,6 +183,9 @@ export class Upload {
       const headers = {
         'x-goog-resumable': 'start',
         'Content-Type': opts.contentType,
+      }
+      if (opts.skipGoogResumableHeader) {
+        delete headers['x-goog-resumable']
       }
 
       if (opts.metadata) {
