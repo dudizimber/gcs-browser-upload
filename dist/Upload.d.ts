@@ -1,4 +1,4 @@
-import * as errors from './errors';
+import * as errors from "./errors";
 export interface IChunkUploadData {
     totalBytes: number;
     uploadedBytes: number;

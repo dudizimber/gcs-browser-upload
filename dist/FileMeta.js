@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileMeta = void 0;
-const STORAGE_KEY = '__gcsBrowserUpload';
+const InMemoryStorage_1 = require("./InMemoryStorage");
+const STORAGE_KEY = "__gcsBrowserUpload";
 class FileMeta {
     constructor(id, fileSize, chunkSize, storage) {
         this.id = id;
         this.fileSize = fileSize;
         this.chunkSize = chunkSize;
-        this.storage = storage;
+        this.storage = storage !== null && storage !== void 0 ? storage : new InMemoryStorage_1.InMemoryStorage();
     }
     getMeta() {
         const meta = this.storage.getItem(`${STORAGE_KEY}.${this.id}`);
@@ -19,7 +20,7 @@ class FileMeta {
                 checksums: [],
                 chunkSize: this.chunkSize,
                 started: false,
-                fileSize: this.fileSize
+                fileSize: this.fileSize,
             };
         }
     }

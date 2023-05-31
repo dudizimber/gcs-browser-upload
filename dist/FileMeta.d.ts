@@ -3,7 +3,7 @@ export declare class FileMeta {
     fileSize: number;
     chunkSize: number;
     storage: Storage;
-    constructor(id: string, fileSize: number, chunkSize: number, storage: Storage);
+    constructor(id: string, fileSize: number, chunkSize: number, storage?: Storage);
     getMeta(): any;
     setMeta(meta: any): void;
     isResumable(): boolean;

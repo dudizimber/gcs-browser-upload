@@ -42,18 +42,28 @@ const FileProcessor_1 = require("./FileProcessor");
 const debug_1 = __importDefault(require("./debug"));
 const errors_1 = require("./errors");
 const errors = __importStar(require("./errors"));
+const InMemoryStorage_1 = require("./InMemoryStorage");
 const MIN_CHUNK_SIZE = 262144;
 class Upload {
     constructor(args, allowSmallChunks = false) {
+        var _a;
         this.finished = false;
-        const opts = Object.assign({ chunkSize: MIN_CHUNK_SIZE, storage: window.localStorage, contentType: 'text/plain', onChunkUpload: () => { }, id: null, url: null, file: null, metadata: null }, args);
-        if ((opts.chunkSize % MIN_CHUNK_SIZE !== 0 || opts.chunkSize === 0) && !allowSmallChunks) {
+        const opts = Object.assign({ chunkSize: MIN_CHUNK_SIZE, storage: (_a = args.storage) !== null && _a !== void 0 ? _a : (() => {
+                try {
+                    return window === null || window === void 0 ? void 0 : window.localStorage;
+                }
+                catch (error) {
+                    return new InMemoryStorage_1.InMemoryStorage();
+                }
+            })(), contentType: "text/plain", onChunkUpload: () => { }, id: null, url: null, file: null, metadata: null }, args);
+        if ((opts.chunkSize % MIN_CHUNK_SIZE !== 0 || opts.chunkSize === 0) &&
+            !allowSmallChunks) {
             throw new errors_1.InvalidChunkSizeError(opts.chunkSize);
         }
         if (!opts.id || !opts.url || !opts.file) {
             throw new errors_1.MissingOptionsError();
         }
-        (0, debug_1.default)('Creating new upload instance:');
+        (0, debug_1.default)("Creating new upload instance:");
         (0, debug_1.default)(` - Url: ${opts.url}`);
         (0, debug_1.default)(` - Id: ${opts.id}`);
         (0, debug_1.default)(` - File size: ${opts.file.size}`);
@@ -77,14 +87,14 @@ class Upload {
                     yield processor.run(validateChunk, 0, resumeIndex);
                 }
                 catch (e) {
-                    (0, debug_1.default)('Validation failed, starting from scratch');
+                    (0, debug_1.default)("Validation failed, starting from scratch");
                     (0, debug_1.default)(` - Failed chunk index: ${e.chunkIndex}`);
                     (0, debug_1.default)(` - Old checksum: ${e.originalChecksum}`);
                     (0, debug_1.default)(` - New checksum: ${e.newChecksum}`);
                     yield processor.run(uploadChunk);
                     return;
                 }
-                (0, debug_1.default)('Validation passed, resuming upload');
+                (0, debug_1.default)("Validation passed, resuming upload");
                 yield processor.run(uploadChunk, resumeIndex);
             });
             const uploadChunk = (checksum, index, chunk) => __awaiter(this, void 0, void 0, function* () {
@@ -92,15 +102,15 @@ class Upload {
                 const start = index * opts.chunkSize;
                 const end = index * opts.chunkSize + chunk.byteLength - 1;
                 const headers = {
-                    'Content-Type': opts.contentType,
-                    'Content-Range': `bytes ${start}-${end}/${total}`,
-                    'x-goog-resumable': 'start'
+                    "Content-Type": opts.contentType,
+                    "Content-Range": `bytes ${start}-${end}/${total}`,
+                    "x-goog-resumable": "start",
                 };
                 if (opts.skipGoogResumableHeader) {
-                    delete headers['x-goog-resumable'];
+                    delete headers["x-goog-resumable"];
                 }
                 if (opts.metadata) {
-                    for (const h of (opts.metadata.entries ? opts.metadata.entries() : [])) {
+                    for (const h of opts.metadata.entries ? opts.metadata.entries() : []) {
                         headers[`x-goog-meta-${h[0]}`] = h[1];
                     }
                 }
@@ -117,7 +127,7 @@ class Upload {
                     totalBytes: total,
                     uploadedBytes: end + 1,
                     chunkIndex: index,
-                    chunkLength: chunk.byteLength
+                    chunkLength: chunk.byteLength,
                 });
             });
             const validateChunk = (newChecksum, index) => __awaiter(this, void 0, void 0, function* () {
@@ -130,12 +140,12 @@ class Upload {
             });
             const getRemoteResumeIndex = () => __awaiter(this, void 0, void 0, function* () {
                 const headers = {
-                    'Content-Range': `bytes */${opts.file.size}`
+                    "Content-Range": `bytes */${opts.file.size}`,
                 };
-                (0, debug_1.default)('Retrieving upload status from GCS');
+                (0, debug_1.default)("Retrieving upload status from GCS");
                 const res = yield safePut(opts.url, null, { headers });
                 checkResponseStatus(res, opts, [308]);
-                const header = res.headers['range'];
+                const header = res.headers["range"];
                 (0, debug_1.default)(`Received upload status from GCS: ${header}`);
                 const range = header.match(/(\d+?)-(\d+?)$/);
                 const bytesReceived = parseInt(range[2]) + 1;
@@ -145,20 +155,20 @@ class Upload {
                 throw new errors_1.UploadAlreadyFinishedError();
             }
             if (meta.isResumable() && meta.getFileSize() === opts.file.size) {
-                (0, debug_1.default)('Upload might be resumable');
+                (0, debug_1.default)("Upload might be resumable");
                 yield resumeUpload();
             }
             else {
-                (0, debug_1.default)('Upload not resumable, starting from scratch');
+                (0, debug_1.default)("Upload not resumable, starting from scratch");
                 const headers = {
-                    'x-goog-resumable': 'start',
-                    'Content-Type': opts.contentType,
+                    "x-goog-resumable": "start",
+                    "Content-Type": opts.contentType,
                 };
                 if (opts.skipGoogResumableHeader) {
-                    delete headers['x-goog-resumable'];
+                    delete headers["x-goog-resumable"];
                 }
                 if (opts.metadata) {
-                    for (const h of (opts.metadata.entries ? opts.metadata.entries() : [])) {
+                    for (const h of opts.metadata.entries ? opts.metadata.entries() : []) {
                         headers[`x-goog-meta-${h[0]}`] = h[1];
                     }
                 }
@@ -166,7 +176,7 @@ class Upload {
                 opts.location = res.headers.location;
                 yield processor.run(uploadChunk);
             }
-            (0, debug_1.default)('Upload complete, resetting meta');
+            (0, debug_1.default)("Upload complete, resetting meta");
             meta.reset();
             this.finished = true;
             return this.lastResult;
@@ -174,22 +184,22 @@ class Upload {
     }
     pause() {
         this.processor.pause();
-        (0, debug_1.default)('Upload paused');
+        (0, debug_1.default)("Upload paused");
     }
     unpause() {
         this.processor.unpause();
-        (0, debug_1.default)('Upload unpaused');
+        (0, debug_1.default)("Upload unpaused");
     }
     cancel() {
         this.processor.pause();
         this.meta.reset();
-        (0, debug_1.default)('Upload cancelled');
+        (0, debug_1.default)("Upload cancelled");
     }
 }
 exports.Upload = Upload;
 Upload.errors = errors;
 function checkResponseStatus(res, opts, allowed = []) {
-    console.log('checkResponseStatus', res.status);
+    console.log("checkResponseStatus", res.status);
     const { status } = res;
     if (allowed.indexOf(status) > -1) {
         return true;
@@ -229,13 +239,13 @@ function safePut(url, data, config) {
 function safePost(url, data, config) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log('safePost', url, data, config);
+            console.log("safePost", url, data, config);
             const d = yield axios_1.default.post(url, data, config);
-            console.log('safePost d', d);
+            console.log("safePost d", d);
             return d;
         }
         catch (e) {
-            console.log('safePost error', e);
+            console.log("safePost error", e);
             if ((0, axios_1.isAxiosError)(e)) {
                 return e.response;
             }
