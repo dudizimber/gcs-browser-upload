@@ -30,7 +30,7 @@ export interface IChunkUploadData {
   chunkLength: number;
 }
 
-export interface IUploadOptions {
+export interface IFileUploadOptions {
   chunkSize?: number;
   storage?: Storage;
   contentType?: string;
@@ -43,17 +43,17 @@ export interface IUploadOptions {
   skipGoogResumableHeader?: boolean;
 }
 
-export class Upload {
+export class FileUpload {
   static errors = errors;
 
-  private opts: IUploadOptions;
+  private opts: IFileUploadOptions;
   private meta: FileMeta;
   private processor: FileProcessor;
   private lastResult: any;
 
   private finished = false;
 
-  constructor(args: IUploadOptions, allowSmallChunks: boolean = false) {
+  constructor(args: IFileUploadOptions, allowSmallChunks: boolean = false) {
     const opts = {
       chunkSize: MIN_CHUNK_SIZE,
       storage:
@@ -252,7 +252,7 @@ export class Upload {
 
 function checkResponseStatus(
   res: AxiosResponse,
-  opts: IUploadOptions,
+  opts: IFileUploadOptions,
   allowed = []
 ) {
   console.log("checkResponseStatus", res.status);
