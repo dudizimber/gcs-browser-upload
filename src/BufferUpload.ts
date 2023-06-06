@@ -54,11 +54,7 @@ export class BufferUpload {
       storage:
         args.storage ??
         (() => {
-          try {
-            return window?.localStorage;
-          } catch (error) {
-            return new InMemoryStorage();
-          }
+          return new InMemoryStorage();
         })(),
       contentType: "text/plain",
       onChunkUpload: () => {
