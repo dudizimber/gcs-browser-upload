@@ -23,7 +23,7 @@ import { InMemoryStorage } from "./InMemoryStorage";
 
 const MIN_CHUNK_SIZE = 262144;
 
-export interface IChunkUploadData {
+export interface IFileChunkUploadData {
   totalBytes: number;
   uploadedBytes: number;
   chunkIndex: number;
@@ -34,7 +34,7 @@ export interface IFileUploadOptions {
   chunkSize?: number;
   storage?: Storage;
   contentType?: string;
-  onChunkUpload?: (data: IChunkUploadData) => void;
+  onChunkUpload?: (data: IFileChunkUploadData) => void;
   id: string;
   url: string;
   file: File;

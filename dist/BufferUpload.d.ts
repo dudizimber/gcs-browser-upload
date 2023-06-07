@@ -1,5 +1,5 @@
 import * as errors from "./errors";
-export interface IChunkUploadData {
+export interface IBufferChunkUploadData {
     totalBytes: number;
     uploadedBytes: number;
     chunkIndex: number;
@@ -9,7 +9,7 @@ export interface IBufferUploadOptions {
     chunkSize?: number;
     storage?: Storage;
     contentType?: string;
-    onChunkUpload?: (data: IChunkUploadData) => void;
+    onChunkUpload?: (data: IBufferChunkUploadData) => void;
     id: string;
     url: string;
     buffer: ArrayBuffer;
