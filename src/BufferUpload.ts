@@ -1,25 +1,20 @@
-import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  isAxiosError,
-} from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from "axios";
+import { BufferProcessor } from "./BufferProcessor";
 import { FileMeta } from "./FileMeta";
-import { FileProcessor } from "./FileProcessor";
+import { InMemoryStorage } from "./InMemoryStorage";
 import debug from "./debug";
+import * as errors from "./errors";
 import {
   DifferentChunkError,
   FileAlreadyUploadedError,
-  UrlNotFoundError,
-  UploadFailedError,
-  UnknownResponseError,
-  MissingOptionsError,
-  UploadIncompleteError,
   InvalidChunkSizeError,
+  MissingOptionsError,
+  UnknownResponseError,
   UploadAlreadyFinishedError,
+  UploadFailedError,
+  UploadIncompleteError,
+  UrlNotFoundError,
 } from "./errors";
-import * as errors from "./errors";
-import { InMemoryStorage } from "./InMemoryStorage";
 
 const MIN_CHUNK_SIZE = 262144;
 
@@ -30,46 +25,44 @@ export interface IChunkUploadData {
   chunkLength: number;
 }
 
-export interface IUploadOptions {
+export interface IBufferUploadOptions {
   chunkSize?: number;
   storage?: Storage;
   contentType?: string;
   onChunkUpload?: (data: IChunkUploadData) => void;
   id: string;
   url: string;
-  file: File;
+  buffer: ArrayBuffer;
   metadata?: Map<string, string>;
   location?: string;
   skipGoogResumableHeader?: boolean;
 }
 
-export class Upload {
+export class BufferUpload {
   static errors = errors;
 
-  private opts: IUploadOptions;
+  private opts: IBufferUploadOptions;
   private meta: FileMeta;
-  private processor: FileProcessor;
+  private processor: BufferProcessor;
   private lastResult: any;
 
   private finished = false;
 
-  constructor(args: IUploadOptions, allowSmallChunks: boolean = false) {
-    const opts = {
+  constructor(args: IBufferUploadOptions, allowSmallChunks = false) {
+    const opts: IBufferUploadOptions = {
       chunkSize: MIN_CHUNK_SIZE,
       storage:
         args.storage ??
         (() => {
-          try {
-            return window?.localStorage;
-          } catch (error) {
-            return new InMemoryStorage();
-          }
+          return new InMemoryStorage();
         })(),
       contentType: "text/plain",
-      onChunkUpload: () => {},
+      onChunkUpload: () => {
+        /** */
+      },
       id: null,
       url: null,
-      file: null,
+      buffer: null,
       metadata: null,
       ...args,
     };
@@ -81,24 +74,24 @@ export class Upload {
       throw new InvalidChunkSizeError(opts.chunkSize);
     }
 
-    if (!opts.id || !opts.url || !opts.file) {
+    if (!opts.id || !opts.url || !opts.buffer) {
       throw new MissingOptionsError();
     }
 
     debug("Creating new upload instance:");
     debug(` - Url: ${opts.url}`);
     debug(` - Id: ${opts.id}`);
-    debug(` - File size: ${opts.file.size}`);
+    debug(` - File size: ${opts.buffer.byteLength}`);
     debug(` - Chunk size: ${opts.chunkSize}`);
 
     this.opts = opts;
     this.meta = new FileMeta(
       opts.id,
-      opts.file.size,
+      opts.buffer.byteLength,
       opts.chunkSize,
       opts.storage
     );
-    this.processor = new FileProcessor(opts.file, opts.chunkSize);
+    this.processor = new BufferProcessor(opts.buffer, opts.chunkSize);
     this.lastResult = null;
   }
 
@@ -135,7 +128,7 @@ export class Upload {
       index: number,
       chunk: ArrayBuffer
     ) => {
-      const total = opts.file.size;
+      const total = opts.buffer.byteLength;
       const start = index * opts.chunkSize;
       const end = index * opts.chunkSize + chunk.byteLength - 1;
 
@@ -188,7 +181,7 @@ export class Upload {
 
     const getRemoteResumeIndex = async () => {
       const headers = {
-        "Content-Range": `bytes */${opts.file.size}`,
+        "Content-Range": `bytes */${opts.buffer.byteLength}`,
       };
       debug("Retrieving upload status from GCS");
       const res = await safePut(opts.url, null, { headers });
@@ -205,7 +198,7 @@ export class Upload {
       throw new UploadAlreadyFinishedError();
     }
 
-    if (meta.isResumable() && meta.getFileSize() === opts.file.size) {
+    if (meta.isResumable() && meta.getFileSize() === opts.buffer.byteLength) {
       debug("Upload might be resumable");
       await resumeUpload();
     } else {
@@ -252,7 +245,7 @@ export class Upload {
 
 function checkResponseStatus(
   res: AxiosResponse,
-  opts: IUploadOptions,
+  opts: IBufferUploadOptions,
   allowed = []
 ) {
   console.log("checkResponseStatus", res.status);
